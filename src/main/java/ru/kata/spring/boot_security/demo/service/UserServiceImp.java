@@ -1,15 +1,11 @@
 package ru.kata.spring.boot_security.demo.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.kata.spring.boot_security.demo.entity.User;
 import ru.kata.spring.boot_security.demo.repositories.UsersRepositories;
-import ru.kata.spring.boot_security.demo.security.UserDetailsImp;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -18,26 +14,17 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public class UserServiceImp implements UserService {
     private final UsersRepositories usersRepositories;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserServiceImp(UsersRepositories usersRepositories) {
+    public UserServiceImp(UsersRepositories usersRepositories, PasswordEncoder passwordEncoder) {
         this.usersRepositories = usersRepositories;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public List<User> findAll() {
         return usersRepositories.findAll();
-    }
-
-    @Override
-    @Transactional
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<User> userOptional = usersRepositories.findByName(username);
-        if (userOptional.isPresent()) {
-            return new UserDetailsImp(userOptional.get());
-        } else {
-            throw new NoSuchElementException(String.format("User '%s' not found", username));
-        }
     }
 
     @Override
@@ -53,7 +40,6 @@ public class UserServiceImp implements UserService {
     @Transactional
     @Override
     public void save(User user) {
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         usersRepositories.save(user);
     }
@@ -61,7 +47,6 @@ public class UserServiceImp implements UserService {
     @Transactional
     @Override
     public void update(Long id, User user) {
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setId(id);
         usersRepositories.save(user);
