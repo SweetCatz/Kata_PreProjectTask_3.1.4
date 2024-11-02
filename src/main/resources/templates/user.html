@@ -2,12 +2,71 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
-    <title>Admin panel</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-            crossorigin="anonymous"></script>
+    <title>User panel</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+
+<!--Шапка с кнопкой logout-->
+<body onload="getCurrentUserInfo()">
+<nav class="nav navbar-dark bg-dark justify-content-between p-2 px-4">
+    <a class="navbar-brand text-white">
+        <b id="currentUserEmailNav"></b> with roles:
+        <b id="currentUserRolesNav"></b>
+        <a class="navbar-brand"></a>
+    </a>
+    <ul class="navbar-nav">
+        <li class="nav-item">
+            <a class="nav-link link-secondary me-md-4" href="/logout_page">Logout</a>
+        </li>
+    </ul>
+</nav>
+
+<div class="container-fluid">
+    <div class="row">
+
+        <div class="col-sm-2 bg-white px-0 py-3" style="height: 100vh;">
+            <div class="list-group nav-pills" id="list-tab" role="tablist">
+                <a class="nav-link active" id="admin-tab" data-toggle="pill" href="#user-panel" role="tab">User</a>
+            </div>
+        </div>
+
+        <div class="col-sm-10 bg-light p-3 px-4">
+            <div class="tab-content" id="nav-tabContent">
+                <div class="tab-pane active" id="user-panel" role="tabpanel" aria-labelledby="user-ref">
+                    <h1>User information-page</h1>
+                    <div class="bg-light border p-2 px-3">
+                        <h4>About user</h4>
+                    </div>
+                    <div class="bg-white p-3 border">
+                        <table class="table table-hover p-2">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Age</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <td id="currentUserID"></td>
+                            <td id="currentUserName"></td>
+                            <td id="currentUserLastName"></td>
+                            <td id="currentUserAge"></td>
+                            <td id="currentUserEmail"></td>
+                            <td id="currentUserRoles"></td>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/js/user.js"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
             integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
             crossorigin="anonymous"></script>
@@ -17,74 +76,6 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
             integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
             crossorigin="anonymous"></script>
-</head>
-<body>
-
-<!--Шапка с кнопкой logout-->
-<nav class="navbar fixed-top navbar-dark bg-dark" data-bs-theme="dark">
-    <nav class="navbar" style="padding-bottom: 2px; padding-top: 2px">
-        <a class="me-md-1 navbar-brand fw-bold ms-3 bordered-text"
-           th:text="${currentUser.email}"></a>
-        <a class="me-md-1 navbar-brand"> with roles: </a>
-        <a class="navbar-brand" th:text="${#strings.arrayJoin(currentUser.getRoles(), ' ')}"></a>
-    </nav>
-    <nav class="nav-item">
-        <a class="nav-link link-secondary me-md-4" th:href="@{/logout}">Logout</a>
-    </nav>
-</nav>
-
-<!--    Левая навигация с выбором вкладок Admin/User  -->
-<div class="d-flex my-5" style="height: 100vh">
-
-    <div class="nav flex-column nav-pills col-2 mt-3">
-        <a class="nav-link active" id="user-tab" data-toggle="pill" href="#user-panel" role="tab">User</a>
-    </div>
-
-    <div class="container-fluid bg-light">
-        <div class="tab-content mt-3">
-
-                    <!-- Информация о текущем пользователе-->
-                    <div class="tab-pane fade show active" id="user-panel" role="tabpanel" aria-labelledby="user-panel-tab">
-                        <div class="container-fluid">
-                            <div class="h1">User information-page</div>
-                            <div class="tab-content">
-
-                                <div class="tab-pane fade show active" aria-labelledby="list-tab">
-                                    <div class="card">
-                                        <h5 class="card-header">About user</h5>
-                                        <div class="card-body">
-                                            <table class="table table-striped">
-                                                <thead>
-                                                <tr>
-                                                    <th scope="col">ID</th>
-                                                    <th scope="col">Name</th>
-                                                    <th scope="col">Last Name</th>
-                                                    <th scope="col">Age</th>
-                                                    <th scope="col">Email</th>
-                                                    <th scope="col">Role</th>
-                                                </tr>
-                                                </thead>
-                                                <tbody>
-                                                <tr th:object="${currentUser}">
-                                                    <td th:text="*{id}"></td>
-                                                    <td th:text="*{name}"></td>
-                                                    <td th:text="*{lastname}"></td>
-                                                    <td th:text="*{age}"></td>
-                                                    <td th:text="*{email}"></td>
-                                                    <td th:text="${#strings.arrayJoin(currentUser.getRoles(), ' ')}"></td>
-                                                </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 </body>
 </html>
