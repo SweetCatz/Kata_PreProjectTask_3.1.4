@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping(value = "/admin")
+@RequestMapping("/admin")
 public class AdminRestController {
     private final UserService userService;
     private final RoleService roleService;
