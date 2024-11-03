@@ -13,7 +13,7 @@ import ru.kata.spring.boot.javascript.demo.service.RoleService;
 import ru.kata.spring.boot.javascript.demo.service.UserService;
 import ru.kata.spring.boot.javascript.demo.util.UserDtoValidator;
 import ru.kata.spring.boot.javascript.demo.util.UserNotFoundException;
-import ru.kata.spring.boot.javascript.demo.util.UserValidationException;
+import ru.kata.spring.boot.javascript.demo.util.UserDtoValidationException;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,19 +29,20 @@ public class AdminRestController {
     private final UserDtoValidator userDtoValidator;
 
     @Autowired
-    public AdminRestController(UserService userService, UserDtoValidator userValidator, RoleService roleService) {
+    public AdminRestController(UserService userService, UserDtoValidator userValidator,
+                               RoleService roleService) {
         this.userService = userService;
         this.userDtoValidator = userValidator;
         this.roleService = roleService;
     }
 
-    @GetMapping("/users/all")
+    @GetMapping("/users")
     public ResponseEntity<List<UserDto>> getAllUsers() {
         return new ResponseEntity<>(userService.findAll().stream()
                 .map(this::convertToUserDto).collect(Collectors.toList()), HttpStatus.OK);
     }
 
-    @GetMapping("/roles/all")
+    @GetMapping("/roles")
     public ResponseEntity<List<Role>> getAllRoles() {
         return new ResponseEntity<>(roleService.findAll(), HttpStatus.OK);
     }
@@ -51,31 +52,32 @@ public class AdminRestController {
         return new ResponseEntity<>(convertToUserDto(userService.findById(id)), HttpStatus.OK);
     }
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<HttpStatus> deleteUserById(@PathVariable Long id) {
-        userService.delete(id);
-        return ResponseEntity.ok(HttpStatus.OK);
-    }
-
-    @PutMapping("/update")
-    public ResponseEntity<HttpStatus> updateUser(@RequestBody @Valid UserDto userDto,
-                                              BindingResult bindingResult) {
+    @PostMapping("/users")
+    public ResponseEntity<HttpStatus> createUser(@RequestBody @Valid UserDto userDto,
+                                                 BindingResult bindingResult) {
         userDtoValidator.validate(userDto, bindingResult);
         if (bindingResult.hasErrors()) {
-            throw new UserValidationException(bindingResult.getFieldErrors());
-        }
-        userService.update(userDto.getId(), convertToUser(userDto));
-        return ResponseEntity.ok(HttpStatus.OK);
-    }
-
-    @PostMapping("/create")
-    public ResponseEntity<HttpStatus> createUser(@RequestBody @Valid UserDto userDto, BindingResult bindingResult) {
-        userDtoValidator.validate(userDto, bindingResult);
-        if (bindingResult.hasErrors()) {
-            throw new UserValidationException(bindingResult.getFieldErrors());
+            throw new UserDtoValidationException(bindingResult.getFieldErrors());
         }
         userService.save(convertToUser(userDto));
-        return ResponseEntity.ok(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @PutMapping("/users")
+    public ResponseEntity<HttpStatus> updateUser(@RequestBody @Valid UserDto userDto,
+                                                 BindingResult bindingResult) {
+        userDtoValidator.validate(userDto, bindingResult);
+        if (bindingResult.hasErrors()) {
+            throw new UserDtoValidationException(bindingResult.getFieldErrors());
+        }
+        userService.update(userDto.getId(), convertToUser(userDto));
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<HttpStatus> deleteUserById(@PathVariable Long id) {
+        userService.delete(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @ExceptionHandler
@@ -84,7 +86,7 @@ public class AdminRestController {
     }
 
     @ExceptionHandler
-    private ResponseEntity<Map<String,String>> handleException(UserValidationException e) {
+    private ResponseEntity<Map<String,String>> handleException(UserDtoValidationException e) {
         Map<String, String> errorsMap = new HashMap<>();
         for (FieldError error : e.getValidationErrors()) {
             errorsMap.put(error.getField(), error.getDefaultMessage());
@@ -95,9 +97,7 @@ public class AdminRestController {
     private User convertToUser(UserDto userDto) {
         User user = new User();
         List<Role> roles = new ArrayList<>();
-        userDto.getRoles().forEach(role -> {
-            roles.add(roleService.findByRoleName("ROLE_".concat(role)));
-        });
+        userDto.getRoles().forEach(role -> roles.add(roleService.findByRoleName("ROLE_".concat(role))));
         user.setName(userDto.getName());
         user.setLastName(userDto.getLastName());
         user.setAge(userDto.getAge());

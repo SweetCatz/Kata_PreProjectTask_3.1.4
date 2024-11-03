@@ -6,7 +6,7 @@ async function onload() {
 
 async function showUserUpdateModal(id) {
     const user = await (await fetch(`/admin/users/${id}`)).json();
-    const roles = await (await fetch(`/admin/roles/all`)).json();
+    const roles = await (await fetch(`/admin/roles`)).json();
 
     document.getElementById('modalUpdateId').value = user.id
     document.getElementById('modalUpdateName').value = user.name
@@ -73,7 +73,7 @@ async function updateUser() {
         .map(option => option.text);
 
     try {
-        let response = await fetch("/admin/update", {
+        let response = await fetch("/admin/users", {
             method: "PUT",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(body)
@@ -148,7 +148,7 @@ async function updateUser() {
 
 function deleteUser() {
     let userId = document.getElementById('modalDeleteId').value
-    fetch("/admin/delete/" + userId, {
+    fetch("/admin/users/" + userId, {
         method: "DELETE",
     }).then(onload)
     $('#deleteUserModal').modal('hide')
@@ -168,7 +168,7 @@ async function createUser() {
         .map(option => option.text)
 
     try {
-        let response = await fetch("/admin/create", {
+        let response = await fetch("/admin/users", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(body)
@@ -239,7 +239,7 @@ async function createUser() {
 }
 
 async function getAllRoles() {
-    const roles = await (await fetch(`/admin/roles/all`)).json();
+    const roles = await (await fetch(`/admin/roles`)).json();
     const rolesForm = document.getElementById('newUserRoles')
     rolesForm.innerText = ''
     roles.forEach((role) => {
@@ -251,7 +251,7 @@ async function getAllRoles() {
 }
 
 async function getAllUsers() {
-    const response = await fetch("/admin/users/all")
+    const response = await fetch("/admin/users")
     const responseText = await response.json();
     let table = document.getElementById("usersTable")
     table.innerHTML = ''
