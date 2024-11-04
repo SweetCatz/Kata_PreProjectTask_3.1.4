@@ -15,10 +15,7 @@ import ru.kata.spring.boot.javascript.demo.util.UserDtoValidator;
 import ru.kata.spring.boot.javascript.demo.util.UserNotFoundException;
 import ru.kata.spring.boot.javascript.demo.util.UserDtoValidationException;
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -96,7 +93,7 @@ public class AdminRestController {
 
     private User convertToUser(UserDto userDto) {
         User user = new User();
-        List<Role> roles = new ArrayList<>();
+        Set<Role> roles = new HashSet<>();
         userDto.getRoles().forEach(role -> roles.add(roleService.findByRoleName("ROLE_".concat(role))));
         user.setName(userDto.getName());
         user.setLastName(userDto.getLastName());
